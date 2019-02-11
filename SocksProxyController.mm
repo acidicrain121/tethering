@@ -516,12 +516,20 @@ static void AcceptCallback(CFSocketRef s, CFSocketCallBackType type, CFDataRef a
         if(self.currentAddress == nil)
             self.currentAddress = [UIDevice localWiFiIPAddress];
         
-        if(currentAddress != nil){
+//        if(currentAddress != nil){
             //start socks proxy server
             [self _startServer];
             //start DNS server
             _DNSServer = DNSServer::getInstance();
-            const char * ipv4Addr = [currentAddress cStringUsingEncoding:NSASCIIStringEncoding];
+            const char * ipv4Addr;
+        
+            // Todo Replace with check for hotspot address
+            if(self.currentAddress == nil){
+                ipv4Addr = "172.20.10.1"; // Hardcoded is bad but works for now
+            }else{
+                ipv4Addr = [currentAddress cStringUsingEncoding:NSASCIIStringEncoding];
+            }
+        
             _DNSServer->startDNSServer(0, ipv4Addr);
             //start HTTP server that advertise socks.pac
             _HTTPServer = [HTTPServer sharedHTTPServerWithSocksProxyPort:currentPort];
@@ -529,11 +537,11 @@ static void AcceptCallback(CFSocketRef s, CFSocketCallBackType type, CFDataRef a
             if (currentHTTPServerState == SERVER_STATE_IDLE ||
                 currentHTTPServerState == SERVER_STATE_STOPPING)
                 [_HTTPServer start];
-        }else{
-            
-            [self _updateStatus:@"Please connect to wifi."];
-            LOG_NETWORK_SOCKS(NSLOGGER_LEVEL_WARNNING, @"No local IP can be retrieved. iPhone may not connect to wifi network\n");
-        }
+//        }else{
+        
+//            [self _updateStatus:@"Please connect to wifi."];
+//            LOG_NETWORK_SOCKS(NSLOGGER_LEVEL_WARNNING, @"No local IP can be retrieved. iPhone may not connect to wifi network\n");
+//        }
         
     }
 	
